@@ -1,0 +1,45 @@
+1. Create Collections for Menu Items, Orders, and Reservations
+db.createCollection("MenuItems")
+db.createCollection("Orders")
+db.createCollection("Reservations")
+
+2. Insert Menu Items with Details
+db.MenuItems.insertMany([
+  { ItemID: 1, Name: 'Spring Rolls', Category: 'Appetizers', Price: 5.99, Available: true },
+  { ItemID: 2, Name: 'Chicken Wings', Category: 'Appetizers', Price: 8.99, Available: true },
+  { ItemID: 3, Name: 'Grilled Salmon', Category: 'Entrees', Price: 14.99, Available: true },
+  { ItemID: 4, Name: 'Steak', Category: 'Entrees', Price: 19.99, Available: false },
+  { ItemID: 5, Name: 'Cheesecake', Category: 'Desserts', Price: 6.50, Available: true }
+])
+
+3.Query to Select All Menu Items in a Specific Category
+db.MenuItems.find({ Category: 'Appetizers' })
+
+4.Update the Order Status After Preparation
+db.Orders.updateOne({ OrderID: 1 }, { $set: { Status: 'Prepared' } })
+
+5.Delete Reservations That Have Been Canceled
+db.Reservations.deleteMany({ Status: 'Canceled' })
+
+6.Filter Orders by Customer or Order Date
+db.Orders.find({ CustomerID: 101 })
+db.Orders.find({ OrderDate: new Date('2023-09-01') })
+
+7.Use AND/OR to Filter Menu Items by Price and Availability
+db.MenuItems.find({ $and: [{ Price: { $lt: 10 } }, { Available: true }] })
+db.MenuItems.find({ $or: [{ Price: { $gt: 15 } }, { Available: false }] })
+
+8.Sort Orders by Order Date or Customer Name
+db.Orders.find().sort({ OrderDate: 1 })
+db.Orders.find().sort({ CustomerName: -1 })
+
+9.Use Aggregate Functions to Count the Total Number of Orders Placed for Each Menu Item
+db.Orders.aggregate([
+  { $group: { _id: "$ItemID", totalOrders: { $sum: 1 } } }
+])
+
+10.Group Orders by Customer and Calculate the Total Amount Spent by Each Customer
+db.Orders.aggregate([
+  { $group: { _id: "$CustomerID", totalAmountSpent: { $sum: "$Amount" } } }
+])
+

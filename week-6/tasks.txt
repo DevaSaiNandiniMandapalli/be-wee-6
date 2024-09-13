@@ -1,0 +1,98 @@
+1.Creating Collections
+db.createCollection("Employees")
+db.createCollection("Orders")
+
+2.Inserting Data into Collections
+db.Employees.insertOne({
+  EmployeeID: 1,
+  FirstName: 'Alice',
+  LastName: 'Johnson',
+  DateOfBirth: new Date('1990-01-15'),
+  Department: 'HR'
+})
+
+db.Orders.insertMany([
+  { OrderID: 1, OrderDate: new Date('2023-05-15'), CustomerID: 101, Amount: 200 },
+  { OrderID: 2, OrderDate: new Date('2023-06-20'), CustomerID: 102, Amount: 400 },
+  { OrderID: 3, OrderDate: new Date('2023-07-10'), CustomerID: 101, Amount: 150 }
+])
+
+3.Selecting Data from Collections
+db.Employees.find()
+db.Orders.find()
+db.Employees.find({}, { FirstName: 1, LastName: 1, _id: 0 })
+db.Orders.find({}, { OrderID: 1, Amount: 1, _id: 0 })
+
+4. Updating Data in a Collection
+db.Employees.updateOne({ EmployeeID: 1 }, { $set: { Department: 'Finance' } })
+db.Orders.updateOne({ OrderID: 2 }, { $set: { Amount: 500 } })
+
+5.Deleting Data from a Collection
+db.Employees.deleteOne({ EmployeeID: 1 })
+db.Orders.deleteMany({ Amount: { $lt: 100 } })
+
+6.Filtering Data with WHERE Clause
+db.Employees.find({ Department: 'HR' })
+db.Orders.find({ Amount: { $gt: 300 } })
+
+7.Using AND / OR in Queries
+db.Employees.find({ Department: 'HR', DateOfBirth: { $gt: new Date('1990-01-01') } })
+db.Orders.find({ Amount: { $gt: 300 }, OrderDate: { $lt: new Date('2023-01-01') } })
+db.Employees.find({ $or: [{ Department: 'HR' }, { Department: 'Finance' }] })
+db.Orders.find({ $or: [{ Amount: { $lt: 100 } }, { OrderDate: { $gt: new Date('2023-01-01') } }] })
+
+8.Sorting Results with ORDER BY
+db.Employees.find().sort({ LastName: 1 })
+db.Orders.find().sort({ Amount: -1 })
+
+9.Using Aggregate Functions
+db.Employees.countDocuments()
+db.Orders.countDocuments()
+db.Orders.aggregate([{ $group: { _id: null, avgAmount: { $avg: "$Amount" } } }])
+db.Employees.aggregate([
+  { $project: { age: { $subtract: [new Date(), "$DateOfBirth"] } } },
+  { $group: { _id: null, avgAge: { $avg: "$age" } } }
+])
+
+10.Grouping Data with GROUP BY
+db.Employees.aggregate([{ $group: { _id: "$Department", count: { $sum: 1 } } }])
+db.Orders.aggregate([{ $group: { _id: "$CustomerID", totalAmount: { $sum: "$Amount" } } }])
+
+11.Using HAVING Clause
+db.Employees.aggregate([
+  { $group: { _id: "$Department", count: { $sum: 1 } } },
+  { $match: { count: { $gt: 5 } } }
+])
+db.Orders.aggregate([
+  { $group: { _id: "$CustomerID", totalAmount: { $sum: "$Amount" } } },
+  { $match: { totalAmount: { $gt: 1000 } } }
+])
+
+12. Joining Collections
+db.Employees.aggregate([
+  {
+    $lookup: {
+      from: "Orders",
+      localField: "EmployeeID", 
+      foreignField: "CustomerID",
+      as: "orders"
+    }
+  },
+  { $unwind: "$orders" },
+  { $project: { FirstName: 1, LastName: 1, "orders.Amount": 1 } }
+])
+db.Employees.aggregate([
+  {
+    $lookup: {
+      from: "Orders",
+      localField: "EmployeeID",
+      foreignField: "CustomerID",
+      as: "orders"
+    }
+  },
+  { $project: { FirstName: 1, LastName: 1, orders: { $ifNull: ["$orders.Amount", null] } } }
+])
+
+
+
+
